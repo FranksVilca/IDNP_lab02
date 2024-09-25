@@ -25,10 +25,12 @@ public class AccountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Inflar el diseño de la actividad con view binding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
 
+        // Referencias a los componentes de la interfaz
         EditText edtUsername = binding.edtUsername;
         EditText edtPassword = binding.edtPassword;
         Button btnLogin = binding.btnLogin;
@@ -43,6 +45,7 @@ public class AccountActivity extends AppCompatActivity {
 
                 // Validar credenciales usando el archivo cuentas.txt
                 if (validateAccount(username, password)) {
+                    // Si la validación es exitosa, mostrar mensaje y navegar a HomeActivity
                     Toast.makeText(getApplicationContext(), "Bienvenido " + username, Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Bienvenido " + username);
 
@@ -50,13 +53,14 @@ public class AccountActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Error en la autenticación", Toast.LENGTH_SHORT).show();
+                    // Mostrar mensaje de error si las credenciales son incorrectas
+                    Toast.makeText(getApplicationContext(), "Cuenta no encontrada", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Error en la autenticación");
                 }
             }
         });
 
-        // Listener para el botón de agregar cuenta
+        // Listener para el botón de agregar cuenta (esto es opcional según tu implementación)
         btnAddAccount.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), AccountActivity.class);
             startActivity(intent);
@@ -81,7 +85,7 @@ public class AccountActivity extends AppCompatActivity {
 
                     // Comparar credenciales
                     if (storedUsername.equals(username) && storedPassword.equals(password)) {
-                        return true;
+                        return true;  // Retornar true si las credenciales coinciden
                     }
                 }
             }
