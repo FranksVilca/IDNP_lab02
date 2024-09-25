@@ -12,9 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ednp_lab02.databinding.ActivityMainBinding;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -63,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Listener para el botón de agregar cuenta (esto es opcional según tu implementación)
+        // Listener para el botón de agregar cuenta
         btnAddAccount.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), AccountActivity.class);
             startActivity(intent);
@@ -100,5 +105,38 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         return null;  // Retornar null si no se encontró la cuenta o las credenciales no coinciden
+    }
+    // Handle new account creation response
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            // Receive new account data in JSON format and save it
+            String jsonAccount = data.getStringExtra("accountData");
+            saveAccountToFile(jsonAccount);
+        }
+    }
+    // Save new account to cuentas.txt
+    private void saveAccountToFile(String jsonAccount) {
+        try {
+            JSONObject accountObject = new JSONObject(jsonAccount);
+            String username = accountObject.getString("username");
+            String password = accountObject.getString("password");
+            String firstname = accountObject.getString("firstname");
+            String lastname = accountObject.getString("lastname");
+            String email = accountObject.getString("email");
+            String phone = accountObject.getString("phone");
+
+            FileOutputStream fos = openFileOutput("cuentas.txt", MODE_APPEND);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+            writer.write(username + "," + password + "," + firstname + "," + lastname + "," + email + "," + phone + "\n");
+            writer.close();
+            fos.close();
+
+            Toast.makeText(this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error al crear la cuenta", Toast.LENGTH_SHORT).show();
+        }
     }
 }
