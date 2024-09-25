@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
     private String validateAccount(String username, String password) {
         try {
             // Abrir el archivo cuentas.txt desde assets
-            InputStream is = getAssets().open("cuentas.txt");
+            InputStream is = openFileInput("cuentas.txt");
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
             String line;

@@ -1,2 +1,0 @@
-admin,admin,John,Doe,johndoe@gmail.com,1234567890
-user1,pass1,Jane,Smith,janesmith@gmail.com,0987654321
