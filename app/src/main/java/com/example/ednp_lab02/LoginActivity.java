@@ -43,14 +43,17 @@ public class LoginActivity extends AppCompatActivity {
                 String username = edtUsername.getText().toString();
                 String password = edtPassword.getText().toString();
 
-                // Validar credenciales usando el archivo cuentas.txt
-                if (validateAccount(username, password)) {
-                    // Si la validación es exitosa, mostrar mensaje y navegar a HomeActivity
-                    Toast.makeText(getApplicationContext(), "Bienvenido " + username, Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Bienvenido " + username);
+                // Validar credenciales y obtener el firstname si es correcto
+                String firstname = validateAccount(username, password);
 
-                    // Iniciar HomeActivity
+                if (firstname != null) {
+                    // Si la validación es exitosa, mostrar mensaje y navegar a HomeActivity
+                    Toast.makeText(getApplicationContext(), "Bienvenido " + firstname, Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Bienvenido " + firstname);
+
+                    // Iniciar HomeActivity y pasar el firstname
                     Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    intent.putExtra("firstname", firstname);  // Pasar el firstname a HomeActivity
                     startActivity(intent);
                 } else {
                     // Mostrar mensaje de error si las credenciales son incorrectas
@@ -68,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     // Método para validar el usuario en el archivo cuentas.txt
-    private boolean validateAccount(String username, String password) {
+    private String validateAccount(String username, String password) {
         try {
             // Abrir el archivo cuentas.txt desde assets
             InputStream is = getAssets().open("cuentas.txt");
@@ -79,13 +82,14 @@ public class LoginActivity extends AppCompatActivity {
                 // Suponiendo que las líneas tienen el formato: username,password,firstname,lastname,email,phone
                 String[] accountData = line.split(",");
 
-                if (accountData.length >= 2) {
+                if (accountData.length >= 3) {
                     String storedUsername = accountData[0];
                     String storedPassword = accountData[1];
+                    String firstname = accountData[2];  // Obtener el firstname
 
                     // Comparar credenciales
                     if (storedUsername.equals(username) && storedPassword.equals(password)) {
-                        return true;  // Retornar true si las credenciales coinciden
+                        return firstname;  // Retornar el firstname si las credenciales coinciden
                     }
                 }
             }
@@ -95,6 +99,6 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        return false;  // Retornar false si no se encontró la cuenta
+        return null;  // Retornar null si no se encontró la cuenta o las credenciales no coinciden
     }
 }
