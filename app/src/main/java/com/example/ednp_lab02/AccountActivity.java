@@ -3,15 +3,17 @@ package com.example.ednp_lab02;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class AccountActivity extends AppCompatActivity {
 
@@ -30,7 +32,7 @@ public class AccountActivity extends AppCompatActivity {
         Button btnAccept = findViewById(R.id.btnAccept);
         Button btnCancel = findViewById(R.id.btnCancel);
 
-        // //Botón Aceptar para crear cuenta y devolver datos
+        // Botón Aceptar para crear cuenta y devolver datos
         btnAccept.setOnClickListener(v -> {
             try {
                 // Crear un objeto JSON con los detalles de la cuenta
@@ -43,31 +45,40 @@ public class AccountActivity extends AppCompatActivity {
                 accountObject.put("password", edtPassword.getText().toString());
 
                 // Guardar los detalles de la cuenta en un archivo
-                saveAccountToFile(accountObject);
+                saveAccountToPrivateExternalStorage(accountObject);
 
                 // Regresar a LoginActivity
                 Intent resultIntent = new Intent();
                 setResult(RESULT_OK, resultIntent);
-                finish();  // cerrar AccountActivity
+                finish();  // Cerrar AccountActivity
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
-        // btncancel para regresar a LoginActivity
+        // Botón Cancelar para regresar a LoginActivity
         btnCancel.setOnClickListener(v -> {
             setResult(RESULT_CANCELED);
             finish();
         });
     }
-    // Método para guardar la cuenta en un archivo
-    private void saveAccountToFile(JSONObject accountObject) {
-        try {
-            String filename = "cuentas.txt";
-            FileOutputStream fos = openFileOutput(filename, Context.MODE_APPEND);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
 
-            // Convertir los detalles de la cuenta en formato CSV
+    // Método para guardar la cuenta en el almacenamiento externo privado
+    private void saveAccountToPrivateExternalStorage(JSONObject accountObject) {
+        try {
+            // Obtener el directorio privado en el almacenamiento externo
+            File externalPrivateDir = getExternalFilesDir(null);  // null indica el directorio raíz privado
+
+            // Si el directorio no existe, crearlo
+            if (!externalPrivateDir.exists()) {
+                externalPrivateDir.mkdirs();
+            }
+
+            // Crear el archivo "cuentas.txt" en el almacenamiento externo privado
+            File file = new File(externalPrivateDir, "cuentas.txt");
+            FileWriter writer = new FileWriter(file, true);  // 'true' para agregar contenido
+
+            // Escribir los detalles de la cuenta en formato CSV
             String accountData = accountObject.getString("username") + "," +
                     accountObject.getString("password") + "," +
                     accountObject.getString("firstname") + "," +
@@ -77,11 +88,28 @@ public class AccountActivity extends AppCompatActivity {
 
             writer.write(accountData);
             writer.close();
-            fos.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    //Leer archivos
+    private String readFile(String filename) {
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            FileInputStream fis = openFileInput(filename);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+
+            reader.close();
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return stringBuilder.toString();
+    }
 }
-
-

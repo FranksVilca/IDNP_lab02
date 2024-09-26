@@ -24,10 +24,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // Obtener el nombre del usuario desde el Intent
         String firstname = getIntent().getStringExtra("firstname");
-
-        // Referencia al TextView
         TextView textView = findViewById(R.id.textView);
-
         // Mostrar el nombre del usuario en el TextView
         if (firstname != null) {
             textView.setText("Bienvenido, " + firstname);

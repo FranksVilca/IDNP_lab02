@@ -12,14 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ednp_lab02.databinding.ActivityMainBinding;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.File;
+import java.io.FileReader;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -78,65 +73,42 @@ public class LoginActivity extends AppCompatActivity {
     // Método para validar el usuario en el archivo cuentas.txt
     private String validateAccount(String username, String password) {
         try {
-            // Abrir el archivo cuentas.txt desde assets
-            InputStream is = openFileInput("cuentas.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            // Obtener el directorio privado en el almacenamiento externo
+            File externalPrivateDir = getExternalFilesDir(null);  // null indica el directorio raíz privado
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Suponiendo que las líneas tienen el formato: username,password,firstname,lastname,email,phone
-                String[] accountData = line.split(",");
+            // Obtener el archivo "cuentas.txt" desde el almacenamiento externo privado
+            File file = new File(externalPrivateDir, "cuentas.txt");
 
-                if (accountData.length >= 3) {
-                    String storedUsername = accountData[0];
-                    String storedPassword = accountData[1];
-                    String firstname = accountData[2];  // Obtener el firstname
+            // Verificar si el archivo existe
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
 
-                    // Comparar credenciales
-                    if (storedUsername.equals(username) && storedPassword.equals(password)) {
-                        return firstname;  // Retornar el firstname si las credenciales coinciden
+                while ((line = reader.readLine()) != null) {
+                    // Suponiendo que las líneas tienen el formato: username,password,firstname,lastname,email,phone
+                    String[] accountData = line.split(",");
+
+                    if (accountData.length >= 3) {
+                        String storedUsername = accountData[0];
+                        String storedPassword = accountData[1];
+                        String firstname = accountData[2];  // Obtener el firstname
+
+                        // Comparar credenciales
+                        if (storedUsername.equals(username) && storedPassword.equals(password)) {
+                            reader.close();
+                            return firstname;  // Retornar el firstname si las credenciales coinciden
+                        }
                     }
                 }
-            }
 
-            reader.close();
+                reader.close();
+            } else {
+                Log.d(TAG, "El archivo cuentas.txt no existe.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;  // Retornar null si no se encontró la cuenta o las credenciales no coinciden
-    }
-    // Handle new account creation response
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            // Receive new account data in JSON format and save it
-            String jsonAccount = data.getStringExtra("accountData");
-            saveAccountToFile(jsonAccount);
-        }
-    }
-    // Save new account to cuentas.txt
-    private void saveAccountToFile(String jsonAccount) {
-        try {
-            JSONObject accountObject = new JSONObject(jsonAccount);
-            String username = accountObject.getString("username");
-            String password = accountObject.getString("password");
-            String firstname = accountObject.getString("firstname");
-            String lastname = accountObject.getString("lastname");
-            String email = accountObject.getString("email");
-            String phone = accountObject.getString("phone");
-
-            FileOutputStream fos = openFileOutput("cuentas.txt", MODE_APPEND);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
-            writer.write(username + "," + password + "," + firstname + "," + lastname + "," + email + "," + phone + "\n");
-            writer.close();
-            fos.close();
-
-            Toast.makeText(this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error al crear la cuenta", Toast.LENGTH_SHORT).show();
-        }
     }
 }
